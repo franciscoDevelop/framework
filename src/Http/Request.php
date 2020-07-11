@@ -1,6 +1,7 @@
 <?php
 
 namespace Phpkain\Http;
+use Phpkain\Http\Server;
 
 class Request
 {
@@ -54,6 +55,7 @@ class Request
   public static function handle()
   {
     static::$script_name = str_replace('\\', '', dirname(Server::get('SCRIPT_NAME')));
+    static::$script_name = str_replace('/', '', dirname(Server::get('SCRIPT_NAME')));
     static::setBaseUrl();
     static::setUrl();
   }
@@ -140,7 +142,20 @@ class Request
    */
   public static function method()
   {
+    // dump(Server::get('REQUEST_METHOD'));
     return Server::get('REQUEST_METHOD');
+  }
+
+  /**
+   *
+   * Check that the request is file content
+   * @return object
+   */
+  public static function getContent()
+  {
+    $request_body = file_get_contents('php://input');
+    $data = json_decode($request_body, true);
+    return  $data;
   }
 
   /**
@@ -176,7 +191,12 @@ class Request
    */
   public static function get($key)
   {
-    return static::value($key, $_GET);
+    $response = static::getContent();
+    if (is_array($response)) {
+      return static::value($key, $response);
+    } else {
+      return static::value($key, $_GET);
+    }
   }
 
   /**
@@ -187,7 +207,44 @@ class Request
    */
   public static function post($key)
   {
-    return static::value($key, $_POST);
+    $response = static::getContent();
+    if (is_array($response)) {
+      return static::value($key, $response);
+    } else {
+      return static::value($key, $_POST);
+    }
+  }
+
+  /**
+   *
+   * Delete value from post request
+   * @param string $key
+   * @return string $value
+   */
+  public static function delete($key)
+  {
+    $response = static::getContent();
+    if (is_array($response)) {
+      return static::value($key, $response);
+    } else {
+      return static::value($key, $_DELETE);
+    }
+  }
+
+  /**
+   *
+   * Put value from post request
+   * @param string $key
+   * @return string $value
+   */
+  public static function put($key)
+  {
+    $response = static::getContent();
+    if (is_array($response)) {
+      return static::value($key, $response);
+    } else {
+      return static::value($key, $_PUT);
+    }
   }
 
   /**

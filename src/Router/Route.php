@@ -81,6 +81,28 @@ class Route
 
   /**
    *
+   * Add new post route
+   * @param string $uri
+   * @param object|callback $callback
+   */
+  public static function delete($uri, $callback)
+  {
+    static::add('DELETE', $uri, $callback);
+  }
+
+  /**
+   *
+   * Add new post route
+   * @param string $uri
+   * @param object|callback $callback
+   */
+  public static function put($uri, $callback)
+  {
+    static::add('PUT', $uri, $callback);
+  }
+
+  /**
+   *
    * Add new any route
    * @param string $uri
    * @param object|callback $callback

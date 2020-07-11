@@ -6,6 +6,7 @@ use Phpkain\File\File;
 use PDO;
 use PDOException;
 use Exception;
+use Phpkain\Http\Server;
 use Phpkain\Http\Request;
 use Phpkain\Url\Url;
 
@@ -516,11 +517,12 @@ class Database {
         static::query(static::$query);
         $query = trim(static::$query, ' ');
         $data = static::$connection->prepare($query);
-        $data->execute();
-        $pages = ceil($data->rowCount() / $items_per_page);
+        $data->execute(static::$binding);
+        $pages = (int) ceil($data->rowCount() / $items_per_page);
+        $total = $data->rowCount();
 
         $page = Request::get('page');
-        $current_page = (! is_numeric($page) || Request::get('page') < 1) ? "1" : $page;
+        $current_page = (! is_numeric($page) || Request::get('page') < 1) ? 1 : $page;
         $offset = ($current_page - 1) * $items_per_page;
         static::limit($items_per_page);
         static::offset($offset);
@@ -529,7 +531,34 @@ class Database {
         $data = static::fetchExecute();
         $result = $data->fetchAll();
 
-        $response = ['data' => $result, 'items_per_page' => $items_per_page, 'pages' => $pages, 'current_page' => $current_page];
+        $from = $current_page - 2;
+        $to = $current_page + 2;
+        if ($from < 2) {
+            $from = 2;
+            $to = $from + 4;
+        }
+        if ($to >= $pages) {
+            $diff = $to - $pages + 1;
+            $from = ($from > 2) ? $from - $diff : 2;
+            $to = $pages - 1;
+        }
+        if ($from < 2) {$from = 1;}
+        if ($to >= $pages) {$to = ($pages - 1);}
+
+        $response = [
+          'data' => $result,
+          'total' => $total,
+          'per_page' => $items_per_page,
+          'current_page' => $current_page,
+          'last_page' => $pages,
+          'first_page_url' => Server::get('HTTP_REFERER')."?page={$current_page}",
+          'last_page_url' => Server::get('HTTP_REFERER')."?page={$pages}",
+          'next_page_url' => Server::get('HTTP_REFERER')."?page={$from}",
+          'path' => Server::get('HTTP_REFERER'),
+          'from' => $current_page,
+          'to' => $pages,
+          // 'pages' => $pages,
+        ];
 
         return $response;
     }

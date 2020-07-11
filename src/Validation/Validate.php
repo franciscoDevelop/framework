@@ -26,7 +26,14 @@ class Validate {
         $validator = new Validator;
 
         $validator->addValidator('unique', new UniqueRule());
-        $validation = $validator->validate($_POST + $_FILES, $rules);
+
+        $response = Request::getContent();
+        if (is_array($response)) {
+          $validation = $validator->validate($response, $rules);
+        } else {
+          $validation = $validator->validate($_POST + $_FILES, $rules);
+        }
+
         $errors = $validation->errors();
 
         if ($validation->fails()) {
