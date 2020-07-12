@@ -443,23 +443,25 @@ class Database {
      */
     private static function execute(Array $data, $query, $where = null) {
         static::instance();
+
         if (! static::$table) {
             throw new Exception("Unknow table");
         }
-
+        static::$setter = '';
+        static::$binding = [];
         foreach($data as $key => $value) {
             static::$setter .= '`' . $key . '` = ?, ';
             static::$binding[] = filter_var($value, FILTER_SANITIZE_STRING);
         }
+
         static::$setter = trim(static::$setter, ', ');
 
         $query .= static::$setter;
         $query .= $where != null ? static::$where . " " : '';
 
         static::$binding = $where != null ? array_merge(static::$binding, static::$where_binding) : static::$binding;
-
-        $data = static::$connection->prepare($query);
-        $data->execute(static::$binding);
+        $stmt = static::$connection->prepare($query);
+        $stmt->execute(static::$binding);
 
         static::clear();
     }

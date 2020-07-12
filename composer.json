@@ -15,7 +15,9 @@
     "rakit/validation": "^1.2",
     "symfony/yaml": "^5.1",
     "symfony/var-dumper": "^5.1",
-    "adldap2/adldap2": "^10.3"
+    "adldap2/adldap2": "^10.3",
+    "fzaninotto/faker": "^1.9",
+    "nesbot/carbon": "^2.36"
   },
   "autoload": {
     "psr-4": {
