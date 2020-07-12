@@ -1,6 +1,7 @@
 <?php
 
 namespace Phpkain\Http;
+
 use Phpkain\Http\Server;
 
 class Request
@@ -82,7 +83,7 @@ class Request
   private static function setUrl()
   {
     $request_uri = urldecode(Server::get('REQUEST_URI'));
-    $request_uri = rtrim(preg_replace("#^" . static::$script_name . '#', '', $request_uri));
+    $request_uri = rtrim(preg_replace("#^" . static::$script_name . '#', '', $request_uri), '/');
 
     $query_string = '';
 
@@ -142,7 +143,6 @@ class Request
    */
   public static function method()
   {
-    // dump(Server::get('REQUEST_METHOD'));
     return Server::get('REQUEST_METHOD');
   }
 
@@ -191,8 +191,8 @@ class Request
    */
   public static function get($key)
   {
-    $response = static::getContent();
-    if (is_array($response)) {
+    if (!isset($_GET[$key])) {
+      $response = static::getContent();
       return static::value($key, $response);
     } else {
       return static::value($key, $_GET);
@@ -207,8 +207,8 @@ class Request
    */
   public static function post($key)
   {
-    $response = static::getContent();
-    if (is_array($response)) {
+    if (!isset($_POST[$key])) {
+      $response = static::getContent();
       return static::value($key, $response);
     } else {
       return static::value($key, $_POST);

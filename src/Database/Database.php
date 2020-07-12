@@ -524,6 +524,8 @@ class Database {
         $total = $data->rowCount();
 
         $page = Request::get('page');
+        // $request_body = file_get_contents('php://input');
+
         $current_page = (! is_numeric($page) || Request::get('page') < 1) ? 1 : $page;
         $offset = ($current_page - 1) * $items_per_page;
         static::limit($items_per_page);
@@ -533,6 +535,11 @@ class Database {
         $data = static::fetchExecute();
         $result = $data->fetchAll();
 
+        $full_link = Url::path(Request::full_url());
+        $full_link = preg_replace('/\?page=(.*)/', '', $full_link);
+        $full_link = preg_replace('/\&page=(.*)/', '', $full_link);
+
+        $links = '';
         $from = $current_page - 2;
         $to = $current_page + 2;
         if ($from < 2) {
@@ -547,19 +554,47 @@ class Database {
         if ($from < 2) {$from = 1;}
         if ($to >= $pages) {$to = ($pages - 1);}
 
+        $first_page_url = null;
+        $next_page_url = null;
+        $prev_page_url = null;
+        $last_page_url = null;
+        $full_link = null;
+
+        if ($pages > 1) {
+            $links .= "<ul class='pagination'>";
+            $full_link = Url::path(Request::full_url());
+            // dump($full_link);
+            $full_link = preg_replace('/\?page=(.*)/', '', $full_link);
+            $full_link = preg_replace('/\&page=(.*)/', '', $full_link);
+
+            $first_page_url = strpos($full_link, '?') ? ($full_link.'&page=1') : ($full_link.'?page=1');
+            $next_page_url = strpos($full_link, '?') ? ($full_link."&page=".($current_page+1)) : ($full_link."?page=".($current_page+1));
+
+            if ($current_page == 1) {
+              $prev_page_url = null;
+            } else {
+              $prev_page_url = strpos($full_link, '?') ? ($full_link.'&page='.($page - 1)) : ($full_link.'?page='.($page - 1));
+            }
+
+            if ($pages > 1) {
+                $last_page_url = strpos($full_link, '?') ? ($full_link.'&page='.$pages) : ($full_link.'?page='.$pages);
+            }
+
+        }
+
         $response = [
-          'data' => $result,
           'total' => $total,
           'per_page' => $items_per_page,
           'current_page' => $current_page,
           'last_page' => $pages,
-          'first_page_url' => Server::get('HTTP_REFERER')."?page={$current_page}",
-          'last_page_url' => Server::get('HTTP_REFERER')."?page={$pages}",
-          'next_page_url' => Server::get('HTTP_REFERER')."?page={$from}",
-          'path' => Server::get('HTTP_REFERER'),
+          'first_page_url' => $first_page_url,
+          'last_page_url' => $last_page_url,
+          'next_page_url' => $next_page_url,
+          'prev_page_url' => $prev_page_url,
+          'path' => $full_link,
           'from' => $current_page,
-          'to' => $pages,
-          // 'pages' => $pages,
+          'to' => $items_per_page,
+          'data' => $result,
         ];
 
         return $response;
