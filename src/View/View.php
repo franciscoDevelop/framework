@@ -39,7 +39,7 @@ class View
    */
   public static function bladeRender($path, $data = [])
   {
-    $blade = new Blade(File::path('views'), File::path('storage/cache'));
+    $blade = new Blade(File::path('resources/views'), File::path('storage/framework/views'));
 
     return $blade->make($path, $data)->render();
   }
@@ -53,7 +53,7 @@ class View
    */
   public static function viewRender($path, $data = [])
   {
-    $path = 'views' . File::ds() . str_replace(['/', '\\', '.'], File::ds(), $path) . '.php';
+    $path = 'resources/views' . File::ds() . str_replace(['/', '\\', '.'], File::ds(), $path) . '.php';
     if (!File::exist($path)) {
       throw new \Exception("The view file {$path} is not exist");
     }
