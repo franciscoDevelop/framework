@@ -8,6 +8,7 @@ use PDOException;
 use Exception;
 use Phpkain\Http\Server;
 use Phpkain\Http\Request;
+use Phpkain\Http\Response;
 use Phpkain\Url\Url;
 
 class Database {
@@ -563,7 +564,7 @@ class Database {
         if ($pages > 1) {
             $links .= "<ul class='pagination'>";
             $full_link = Url::path(Request::full_url());
-            // dump($full_link);
+
             $full_link = preg_replace('/\?page=(.*)/', '', $full_link);
             $full_link = preg_replace('/\&page=(.*)/', '', $full_link);
 

@@ -67,6 +67,23 @@ if (! function_exists('url')) {
 
 /**
  *
+ * Full url path
+ * @param string $path
+ * @return mixed
+ */
+if (! function_exists('checkactive')) {
+  function checkactive($path)
+  {
+    if (\Phpkain\Http\Request::url() == $path) {
+      echo 'active';
+    } else {
+      echo '';
+    }
+  }
+}
+
+/**
+ *
  * Asset path
  * @param string $path
  * @return mixed
